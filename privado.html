@@ -58,7 +58,16 @@ onSnapshot(q, (snapshot) => {
 
   snapshot.forEach((doc) => {
     const data = doc.data();
-    chat.innerHTML += "<p><b>" + data.usuario + ":</b> " + data.texto + "</p>";
+    if (data.texto.startsWith("http")) {
+  chat.innerHTML += `
+    <p><b>${data.usuario}:</b></p>
+    <img src="${data.texto}" style="max-width:200px;">
+  `;
+} else {
+  chat.innerHTML += `
+    <p><b>${data.usuario}:</b> ${data.texto}</p>
+  `;
+}
   });
 
   // 🔥 bajar automáticamente
