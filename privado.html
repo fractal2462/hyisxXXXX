@@ -45,7 +45,11 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // escuchar mensajes en tiempo real
-onSnapshot(collection(db, "mensajes"), (snapshot) => {
+import { query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const q = query(collection(db, "mensajes"), orderBy("fecha"));
+
+onSnapshot(q, (snapshot) => {
   const chat = document.getElementById("chat");
   chat.innerHTML = "";
   snapshot.forEach((doc) => {
