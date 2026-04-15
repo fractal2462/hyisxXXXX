@@ -58,10 +58,10 @@ onSnapshot(q, (snapshot) => {
 
   snapshot.forEach((doc) => {
     const data = doc.data();
-    if (data.texto.startsWith("http")) {
+   if (data.texto && data.texto.includes("http")) {
   chat.innerHTML += `
     <p><b>${data.usuario}:</b></p>
-    <img src="${data.texto}" style="max-width:200px;">
+    <img src="${data.texto.trim()}" style="max-width:200px;">
   `;
 } else {
   chat.innerHTML += `
