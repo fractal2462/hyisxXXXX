@@ -1,55 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Panel</title>
-  <style>
-    body {
-      font-family: Arial;
-      text-align: center;
-      margin-top: 50px;
-      background: #f2f2f2;
-    }
-    .box {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      display: inline-block;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    button {
-      padding: 10px 20px;
-      border: none;
-      background: #ff4d4d;
-      color: white;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #e60000;
-    }
-  </style>
+  <title>Chat</title>
 </head>
 <body>
 
-<div class="box">
-  <h1>Bienvenido 🔐</h1>
-  <p id="correo"></p>
-  <button onclick="logout()">Cerrar sesión</button>
-</div>
+<h2>Chat 💬</h2>
+
+<div id="chat"></div>
+
+<input type="text" id="mensaje" placeholder="Escribe algo">
+<button onclick="enviar()">Enviar</button>
+
+<br><br>
+<button onclick="logout()">Cerrar sesión</button>
 
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const auth = getAuth();
+const firebaseConfig = {
+  apiKey: "AIzaSyDVR8vCGuKYjUR-9v_x80fNY5bPewMaxKU",
+  authDomain: "hyisx-b4490.firebaseapp.com",
+  projectId: "hyisx-b4490",
+  storageBucket: "hyisx-b4490.firebasestorage.app",
+  messagingSenderId: "960225169942",
+  appId: "1:960225169942:web:f93314f0227420c75b5b37"
+};
 
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let usuarioActual = null;
+
+// verificar login
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "index.html";
   } else {
-    document.getElementById("correo").innerText = "Sesión iniciada como: " + user.email;
+    usuarioActual = user.email;
   }
 });
 
+// escuchar mensajes en tiempo real
+onSnapshot(collection(db, "mensajes"), (snapshot) => {
+  const chat = document.getElementById("chat");
+  chat.innerHTML = "";
+  snapshot.forEach((doc) => {
+    const data = doc.data();
+    chat.innerHTML += "<p><b>" + data.usuario + ":</b> " + data.texto + "</p>";
+  });
+});
+
+// enviar mensaje
+window.enviar = async function() {
+  const texto = document.getElementById("mensaje").value;
+
+  if (texto === "") return;
+
+  await addDoc(collection(db, "mensajes"), {
+    usuario: usuarioActual,
+    texto: texto
+  });
+
+  document.getElementById("mensaje").value = "";
+}
+
+// cerrar sesión
 window.logout = function() {
   signOut(auth).then(() => {
     window.location.href = "index.html";
