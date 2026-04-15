@@ -47,15 +47,22 @@ onAuthStateChanged(auth, (user) => {
 // escuchar mensajes en tiempo real
 import { query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-const q = query(collection(db, "mensajes"), orderBy("fecha"));
+const q = query(
+  collection(db, "mensajes"),
+  orderBy("fecha", "asc")
+);
 
 onSnapshot(q, (snapshot) => {
   const chat = document.getElementById("chat");
   chat.innerHTML = "";
+
   snapshot.forEach((doc) => {
     const data = doc.data();
     chat.innerHTML += "<p><b>" + data.usuario + ":</b> " + data.texto + "</p>";
   });
+
+  // 🔥 bajar automáticamente
+  chat.scrollTop = chat.scrollHeight;
 });
 
 // enviar mensaje
@@ -65,10 +72,10 @@ window.enviar = async function() {
   if (texto === "") return;
 
   await addDoc(collection(db, "mensajes"), {
-    usuario: usuarioActual,
-    texto: texto
-  });
-
+  usuario: usuarioActual,
+  texto: texto,
+  fecha: Date.now()
+});
   document.getElementById("mensaje").value = "";
 }
 
