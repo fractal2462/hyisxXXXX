@@ -25,7 +25,7 @@
   <button onclick="guardarNotas()">Guardar</button>
 </div>
 
-<div id="chat"></div>
+<div id="chat" style="height:300px; overflow-y:auto; border:1px solid #ccc; padding:10px;"></div>
 
 <input type="text" id="mensaje" placeholder="Escribe algo">
 <button onclick="enviar()">Enviar</button>
@@ -71,36 +71,24 @@ onSnapshot(q, (snapshot) => {
   const chat = document.getElementById("chat");
   chat.innerHTML = "";
 
- snapshot.forEach((docu) => {
-  const data = docu.data();
-
-  let botonBorrar = "";
-
-  if (usuarioActual === "systex@gmail.com") {
-    botonBorrar = `<button onclick="borrar('${docu.id}')">❌</button>`;
-  }
-
-  if (data.texto && data.texto.includes("http")) {
-    chat.innerHTML += `
-      <p><b>${data.usuario}:</b> ${botonBorrar}</p>
-      <img src="${data.texto.trim()}" style="max-width:200px;">
-    `;
-  } else {
-    chat.innerHTML += `
-      <p><b>${data.usuario}:</b> ${data.texto} ${botonBorrar}</p>
-    `;
-  }
-});
+  snapshot.forEach((docu) => {
     const data = docu.data();
+
+    let botonBorrar = "";
+
+    // 👑 SOLO TÚ (CAMBIA EL CORREO SI ES NECESARIO)
+    if (usuarioActual === "systex@gmail.com") {
+      botonBorrar = `<button onclick="borrar('${docu.id}')">❌</button>`;
+    }
 
     if (data.texto && data.texto.includes("http")) {
       chat.innerHTML += `
-        <p><b>${data.usuario}:</b></p>
+        <p><b>${data.usuario}:</b> ${botonBorrar}</p>
         <img src="${data.texto.trim()}" style="max-width:200px;">
       `;
     } else {
       chat.innerHTML += `
-        <p><b>${data.usuario}:</b> ${data.texto}</p>
+        <p><b>${data.usuario}:</b> ${data.texto} ${botonBorrar}</p>
       `;
     }
   });
@@ -108,7 +96,7 @@ onSnapshot(q, (snapshot) => {
   chat.scrollTop = chat.scrollHeight;
 });
 
-/* 📤 ENVIAR MENSAJE */
+/* 📤 ENVIAR */
 window.enviar = async function() {
   const texto = document.getElementById("mensaje").value;
 
@@ -121,6 +109,11 @@ window.enviar = async function() {
   });
 
   document.getElementById("mensaje").value = "";
+};
+
+/* 🗑️ BORRAR */
+window.borrar = async function(id) {
+  await deleteDoc(doc(db, "mensajes", id));
 };
 
 /* 🚪 LOGOUT */
@@ -156,9 +149,6 @@ async function cargarInfo() {
   if (docSnap.exists()) {
     document.getElementById("textoInfo").value = docSnap.data().contenido;
   }
-}
-  window.borrar = async function(id) {
-  await deleteDoc(doc(db, "mensajes", id));
 }
 
 </script>
